@@ -19,6 +19,9 @@ namespace PockerApp
             Color = color;
             Symbole = symbole;
             Id = id;
+
+
+
         }
     }
 }
