@@ -12,11 +12,13 @@ namespace PockerApp
         public string Color { get; set; }
         public string Symbole { get; set; }
 
-        public Cartes(string number, string color, string symbole)
+        public int Id { get; set; }
+        public Cartes(string number, string color, string symbole, int id)
         {
             Number = number;
             Color = color;
             Symbole = symbole;
+            Id = id;
         }
     }
 }
