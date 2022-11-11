@@ -9,9 +9,15 @@ namespace PockerApp
 {
     internal class Cartes
     {
-        public static int compt()
+        public string Number { get; set; }
+        public string Color { get; set; }
+        public string Symbole { get; set; }
+
+        public Cartes(string number, string color, string symbole)
         {
-            return 0;
+            Number = number;
+            Color = color;
+            Symbole = symbole;
         }
     }
     
