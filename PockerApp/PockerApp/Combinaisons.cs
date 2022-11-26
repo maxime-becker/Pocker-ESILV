@@ -42,6 +42,11 @@ namespace PockerApp
                 Combinaison= 997;
                 return;
             }
+            if(isColor(list))
+            {
+                Combinaison = 996;
+                return;
+            }
             Combinaison = -1;
         }
 
@@ -278,6 +283,41 @@ namespace PockerApp
                 }              
             }
             return false;
+        }
+
+        public bool isColor(List<Cartes> cartes)
+        {
+            List<Cartes> blacked = new List<Cartes>();
+            List<Cartes> rouged = new List<Cartes>();
+
+            foreach (var card in cartes)
+            {
+                if (card.Symbole is "Pique" or "Trefle")
+                {
+                    blacked.Add(card);
+                }
+                if (card.Symbole is "Coeur" or "Carreau")
+                {
+                    rouged.Add(card);
+                }
+            }
+            return blacked.Count >= 5 ? true : rouged.Count >= 5 ? true : false; 
+            //if (blacked.Count > 5) 
+            //{
+            //    return true;
+            //}
+            //else
+            //{
+            //    if (rouged.Count > 5)
+            //    {
+            //        return true;
+            //    }
+            //    else
+            //    {
+            //        return false;
+            //    }
+            //}
+            //il regarde si il y a 5 cartes noirs (si oui il renvoit true, sinon il regarde si il y a 5 >= cartes rouges si oui true sinon false. 
         }
     }
 }

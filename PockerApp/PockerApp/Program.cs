@@ -18,13 +18,13 @@ public class Program
             maList[0],
             maList[1],
             maList[2],
-            maList[4],
-            maList[5]
+            maList[43],
+            maList[12]
         
         };
 
-        Cartes carte1 = maList[41];
-        Cartes carte2 = maList[19];
+        Cartes carte1 = maList[37];
+        Cartes carte2 = maList[44];
 
         Combinaisons player1 = new Combinaisons(maList2, carte1, carte2);
         Console.WriteLine(player1.Combinaison);
