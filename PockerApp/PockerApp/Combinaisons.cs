@@ -27,27 +27,34 @@ namespace PockerApp
                 Combinaison = 1000;
                 return;
             }
-            if(isQuinteFlush(list))
+            if (isQuinteFlush(list))
             {
                 Combinaison = 999;
                 return;
             }
-            if(isSquare(list))
+            if (isSquare(list))
             {
                 Combinaison = 998;
                 return;
             }
-            if(isFull(list))
+            if (isFull(list))
             {
-                Combinaison= 997;
+                Combinaison = 997;
                 return;
             }
-            if(isColor(list))
+            if (isColor(list))
             {
                 Combinaison = 996;
                 return;
             }
+            if (isQuinte(list))
+            {
+                Combinaison = 995;
+                return;
+            }
             Combinaison = -1;
+
+
         }
 
         public bool isQuinteFlushRoyale(List<Cartes> cartes)
@@ -55,13 +62,13 @@ namespace PockerApp
             List<Cartes> blacked = new List<Cartes>();
             List<Cartes> rouged = new List<Cartes>();
 
-            foreach(var card in cartes)
+            foreach (var card in cartes)
             {
-                if(card.Symbole is "Pique" or "Trefle")
+                if (card.Symbole is "Pique" or "Trefle")
                 {
                     blacked.Add(card);
                 }
-                if(card.Symbole is "Coeur" or "Carreau")
+                if (card.Symbole is "Coeur" or "Carreau")
                 {
                     rouged.Add(card);
                 }
@@ -184,14 +191,14 @@ namespace PockerApp
                     }
                 }
             }
-            if(rouged.Count > 4) 
+            if (rouged.Count > 4)
             {
                 int suite = 0;
                 for (int i = 0; i < rouged.Count - 1; i++)
                 {
-                    if(suite == 5)
+                    if (suite == 5)
                     {
-                        return true; 
+                        return true;
                     }
                     if (rouged[i].Power - rouged[i + 1].Power == -1)
                     {
@@ -237,9 +244,9 @@ namespace PockerApp
                         count++;
                     }
                 }
-                if(count == 4)
-                { 
-                    return true; 
+                if (count == 4)
+                {
+                    return true;
                 }
                 else
                 {
@@ -275,12 +282,12 @@ namespace PockerApp
                                 count2++;
                             }
                         }
-                        if(count2 == 2)
+                        if (count2 == 2)
                         {
                             return true;
-                        }                       
+                        }
                     }
-                }              
+                }
             }
             return false;
         }
@@ -301,7 +308,7 @@ namespace PockerApp
                     rouged.Add(card);
                 }
             }
-            return blacked.Count >= 5 ? true : rouged.Count >= 5 ? true : false; 
+            return blacked.Count >= 5 ? true : rouged.Count >= 5 ? true : false;
             //if (blacked.Count > 5) 
             //{
             //    return true;
@@ -318,6 +325,39 @@ namespace PockerApp
             //    }
             //}
             //il regarde si il y a 5 cartes noirs (si oui il renvoit true, sinon il regarde si il y a 5 >= cartes rouges si oui true sinon false. 
+        }
+
+        public bool isQuinte(List<Cartes> cartes)
+        {
+            for (int i = 0; i < cartes.Count; i++)
+            {
+                for (int j = 0; j < cartes.Count; j++)
+                {
+                    if (cartes[j].Power < cartes[i].Power)
+                    {
+                        var tmp = cartes[j];
+                        cartes[j] = cartes[i];
+                        cartes[i] = tmp;
+                    }
+                }
+            }
+            int suite = 0;
+            for (int i = 0; i < cartes.Count - 1; i++)
+            {
+                if (cartes[i].Power - cartes[i + 1].Power == -1)
+                {
+                    suite++;
+                }
+                else
+                {
+                    suite = 0;
+                }
+                if (suite == 5)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
