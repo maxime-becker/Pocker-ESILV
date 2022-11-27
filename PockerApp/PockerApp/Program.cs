@@ -15,16 +15,16 @@ public class Program
 
         List<Cartes> maList2 = new List<Cartes> 
         { 
-            maList[35],
-            maList[33],
-            maList[34],
+            maList[0],
+            maList[9],
             maList[15],
-            maList[5]
+            maList[21],
+            maList[30]
         
         };
 
-        Cartes carte1 = maList[0];
-        Cartes carte2 = maList[6];
+        Cartes carte1 = maList[37];
+        Cartes carte2 = maList[51];
 
         Combinaisons player1 = new Combinaisons(maList2, carte1, carte2);
         Console.WriteLine(player1.Combinaison);

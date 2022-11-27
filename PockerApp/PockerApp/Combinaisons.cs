@@ -103,6 +103,7 @@ namespace PockerApp
                 Combinaison += 200;
                 return;
             }
+
             else
             {
                 Combinaison += isDefault(list);
@@ -432,6 +433,13 @@ namespace PockerApp
                         }
                     }
                     return true;
+                }
+            }
+            foreach (var card in cartes)
+            {
+                if (card.Power == 1)
+                {
+                    card.Power = 14;
                 }
             }
             return false;
