@@ -93,6 +93,11 @@ namespace PockerApp
                 Combinaison += 400;
                 return;
             }
+            if(isTwoPairs(list))
+            {
+                Combinaison += 300;
+                return;
+            }
             Combinaison = -1;
 
 
@@ -436,9 +441,22 @@ namespace PockerApp
             return false;
         }
 
-        public bool isTwoPairs(List<Cartes> cards)
+        public bool isTwoPairs(List<Cartes> cartes)
         {
-
+            SortByPower(cartes);
+            int nbPair = 0;
+            for (int i = 0; i < cartes.Count - 1; i++)
+            {
+                if (cartes[i].Power == cartes[i+1].Power)
+                {
+                    nbPair += 1;
+                }
+                if(nbPair == 2)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
