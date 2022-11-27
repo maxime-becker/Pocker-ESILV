@@ -88,6 +88,11 @@ namespace PockerApp
                 Combinaison += 500;
                 return;
             }
+            if(isBrelan(list))
+            {
+                Combinaison += 400;
+                return;
+            }
             Combinaison = -1;
 
 
@@ -429,6 +434,11 @@ namespace PockerApp
                 }
             }
             return false;
+        }
+
+        public bool isTwoPairs(List<Cartes> cards)
+        {
+
         }
     }
 }
