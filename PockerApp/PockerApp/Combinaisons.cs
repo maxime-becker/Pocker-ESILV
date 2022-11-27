@@ -424,6 +424,13 @@ namespace PockerApp
                 }
                 if (suite == 4)
                 {
+                    foreach (var card in cartes)
+                    {
+                        if (card.Power == 1)
+                        {
+                            card.Power = 14;
+                        }
+                    }
                     return true;
                 }
             }
