@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PockerApp
 {
-    internal class Cartes
+    public class Cartes
     {
         public int Power { get; set; }
         public string Number { get; set; }
