@@ -311,38 +311,42 @@ namespace PockerApp
 
         public bool isFull(List<Cartes> cartes)
         {
-            string three = "";
-            for (int i = 0; i < cartes.Count; i++)
+            SortByPower(cartes);
+            int val = 0;
+            Cartes tmp = cartes[0];
+            bool isThree = false;
+            for (int i = 0; i < cartes.Count - 1; i++)
             {
-                int count = 1;
-                for (int j = i + 1; j < cartes.Count; j++)
+                if (cartes[i].Power == cartes[i + 1].Power)
                 {
-                    if (cartes[j].Number == cartes[i].Number)
-                    {
-                        three = cartes[i].Number;
-                        count++;
-                    }
+                    val++;
                 }
-                if (count == 3)
+                else
                 {
-                    for (int k = 0; k < cartes.Count; k++)
-                    {
-                        int count2 = 1;
-                        for (int l = k + 1; l < cartes.Count; l++)
-                        {
-                            if (cartes[k].Number == cartes[l].Number && cartes[l].Number != three)
-                            {
-                                count2++;
-                            }
-                        }
-                        if (count2 == 1)
-                        {
-                            return true;
-                        }
-                    }
+                    val = 0;
+                }
+                if(val == 2)
+                {
+                    tmp = cartes[i];
+                    isThree = true;
+                    break;
                 }
             }
-            return false;
+            if(isThree is false)
+            {
+                return false;
+            }
+            else
+            {
+                for (int i = 0; i < cartes.Count - 1; i++)
+                {
+                    if (cartes[i].Power == cartes[i + 1].Power && cartes[i].Power != tmp.Power)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
 
         public bool isColor(List<Cartes> cartes)
