@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
@@ -12,8 +13,27 @@ namespace PockerApp
     {
         public int Combinaison { get; }
 
+        #region StaticFunctions
+
+        public static int GetMaxPower(List<Cartes> list)
+        {
+            int max = list[0].Power;
+            for (int i = 1; i < list.Count; i++)
+            {
+                if (list[i].Power > max)
+                {
+                    max = list[i].Power;
+                }
+            }
+            return max;
+        }
+
+        #endregion
+
         public Combinaisons(List<Cartes> tapis, Cartes carte1, Cartes carte2)
         {
+            Combinaison = 0;
+
             List<Cartes> list = new List<Cartes>();
             foreach (Cartes carte in tapis)
             {
@@ -24,32 +44,32 @@ namespace PockerApp
 
             if (isQuinteFlushRoyale(list))
             {
-                Combinaison = 1000;
+                Combinaison += 1000;
                 return;
             }
             if (isQuinteFlush(list))
             {
-                Combinaison = 999;
+                Combinaison += 900;
                 return;
             }
             if (isSquare(list))
             {
-                Combinaison = 998;
+                Combinaison += 800;
                 return;
             }
             if (isFull(list))
             {
-                Combinaison = 997;
+                Combinaison += 700;
                 return;
             }
             if (isColor(list))
             {
-                Combinaison = 996;
+                Combinaison += 600;
                 return;
             }
             if (isQuinte(list))
             {
-                Combinaison = 995;
+                Combinaison += 500;
                 return;
             }
             Combinaison = -1;
@@ -196,7 +216,7 @@ namespace PockerApp
                 int suite = 0;
                 for (int i = 0; i < rouged.Count - 1; i++)
                 {
-                    if (suite == 5)
+                    if (suite == 4)
                     {
                         return true;
                     }
@@ -223,7 +243,7 @@ namespace PockerApp
                     {
                         suite = 0;
                     }
-                    if (suite == 5)
+                    if (suite == 4)
                     {
                         return true;
                     }
@@ -331,7 +351,7 @@ namespace PockerApp
         {
             for (int i = 0; i < cartes.Count; i++)
             {
-                for (int j = 0; j < cartes.Count; j++)
+                for (int j = i + 1; j < cartes.Count; j++)
                 {
                     if (cartes[j].Power < cartes[i].Power)
                     {
@@ -352,7 +372,42 @@ namespace PockerApp
                 {
                     suite = 0;
                 }
-                if (suite == 5)
+                if (suite == 4)
+                {
+                    return true;
+                }
+            }
+            foreach(var card in cartes)
+            {
+                if(card.Power == 14)
+                {
+                    card.Power = 1;
+                }
+            }
+            for (int i = 0; i < cartes.Count; i++)
+            {
+                for (int j = 0; j < cartes.Count; j++)
+                {
+                    if (cartes[j].Power < cartes[i].Power)
+                    {
+                        var tmp = cartes[j];
+                        cartes[j] = cartes[i];
+                        cartes[i] = tmp;
+                    }
+                }
+            }
+            suite = 0;
+            for (int i = 0; i < cartes.Count - 1; i++)
+            {
+                if (cartes[i].Power - cartes[i + 1].Power == -1)
+                {
+                    suite++;
+                }
+                else
+                {
+                    suite = 0;
+                }
+                if (suite == 4)
                 {
                     return true;
                 }
