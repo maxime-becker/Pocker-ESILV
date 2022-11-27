@@ -103,10 +103,11 @@ namespace PockerApp
                 Combinaison += 200;
                 return;
             }
-
-            Combinaison = -1;
-
-
+            else
+            {
+                Combinaison += isDefault(list);
+                return;
+            }
         }
 
         public bool isQuinteFlushRoyale(List<Cartes> cartes)
@@ -334,7 +335,7 @@ namespace PockerApp
                                 count2++;
                             }
                         }
-                        if (count2 == 2)
+                        if (count2 == 1)
                         {
                             return true;
                         }
@@ -476,6 +477,12 @@ namespace PockerApp
                 }
             }
             return false;
+        }
+
+        public int isDefault(List<Cartes> cartes)
+        {
+            SortByPower(cartes);
+            return cartes[cartes.Count - 1].Power;
         }
     }
 }
