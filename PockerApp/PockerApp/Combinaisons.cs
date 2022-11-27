@@ -28,6 +28,22 @@ namespace PockerApp
             return max;
         }
 
+        public static void SortByPower(List<Cartes> cartes)
+        {
+            for (int i = 0; i < cartes.Count; i++)
+            {
+                for (int j = i + 1; j < cartes.Count; j++)
+                {
+                    if (cartes[j].Power < cartes[i].Power)
+                    {
+                        var tmp = cartes[j];
+                        cartes[j] = cartes[i];
+                        cartes[i] = tmp;
+                    }
+                }
+            }
+        }
+
         #endregion
 
         public Combinaisons(List<Cartes> tapis, Cartes carte1, Cartes carte2)
@@ -349,18 +365,7 @@ namespace PockerApp
 
         public bool isQuinte(List<Cartes> cartes)
         {
-            for (int i = 0; i < cartes.Count; i++)
-            {
-                for (int j = i + 1; j < cartes.Count; j++)
-                {
-                    if (cartes[j].Power < cartes[i].Power)
-                    {
-                        var tmp = cartes[j];
-                        cartes[j] = cartes[i];
-                        cartes[i] = tmp;
-                    }
-                }
-            }
+            SortByPower(cartes);
             int suite = 0;
             for (int i = 0; i < cartes.Count - 1; i++)
             {
@@ -384,18 +389,7 @@ namespace PockerApp
                     card.Power = 1;
                 }
             }
-            for (int i = 0; i < cartes.Count; i++)
-            {
-                for (int j = 0; j < cartes.Count; j++)
-                {
-                    if (cartes[j].Power < cartes[i].Power)
-                    {
-                        var tmp = cartes[j];
-                        cartes[j] = cartes[i];
-                        cartes[i] = tmp;
-                    }
-                }
-            }
+            SortByPower(cartes);
             suite = 0;
             for (int i = 0; i < cartes.Count - 1; i++)
             {
@@ -408,6 +402,28 @@ namespace PockerApp
                     suite = 0;
                 }
                 if (suite == 4)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool isBrelan(List<Cartes> cartes)
+        {
+            SortByPower(cartes);
+            int same = 0;
+            for (int i = 0; i < cartes.Count - 1; i++)
+            {
+                if (cartes[i].Power == cartes[i+1].Power)
+                {
+                    same++;
+                }
+                else
+                {
+                    same = 0;
+                }
+                if(same == 2)
                 {
                     return true;
                 }
