@@ -3,6 +3,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace PockerApp;
 
+
 public static class Program
 {
     internal static List<Cartes> _Cartes = new List<Cartes>();
@@ -35,8 +36,7 @@ public static class Program
 
 
         CreateRoom();
-        PrintGameDetails();
-
+        PrintGameDetails();    
     }
 
     public static void PrintGameDetails()
@@ -102,7 +102,7 @@ public static class Program
             if (player.Argent < prix)
             {
                 Console.WriteLine("Player" + player.Name + ", you don't have enought money, you cannot participate to the game");
-                player.CanPlay = false;
+                player.IsOut = false;
             }
             else
             {
@@ -110,7 +110,7 @@ public static class Program
                 Console.WriteLine("Player" + player.Name + ", in order to participate to the game you need to pay " + prix);
                 Console.WriteLine("Player" + player.Name + ", do you want to pay to play the game ? (y/n)");
                 string choice = Console.ReadLine()!;
-                if ( choice == "y")
+                if ( choice == "y" )
                 {
                     Console.WriteLine("Player " + player.Name + ", you are in the game !");
                     player.Argent -= prix;
@@ -161,8 +161,9 @@ public static class Program
                     Program.GetAndRemoveCard(),
                     Program.GetAndRemoveCard(),
                     Program.DefaultMoney,
-                    true,
-                    name
+                    false,
+                    name,
+                    false
                 );
             playsersList.Add(player);
         }
