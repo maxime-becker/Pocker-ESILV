@@ -14,6 +14,7 @@ namespace PockerApp
         public bool IsOut { get; set; } 
         public string Name { get; set; }
         public bool IsCarpet { get; set; }   
+        
         public Player(Cartes card1, Cartes card2, int argent, bool isOut, string name, bool isCarpet)
         {
             Card1 = card1;
