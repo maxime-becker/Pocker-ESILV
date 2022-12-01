@@ -11,7 +11,6 @@ namespace PockerApp
 {
     internal class Combinaisons
     {
-        public int Combinaison { get; }
 
         #region StaticFunctions
 
@@ -46,9 +45,9 @@ namespace PockerApp
 
         #endregion
 
-        public Combinaisons(List<Cartes> tapis, Cartes carte1, Cartes carte2)
+        public static int GetCombinaisons(List<Cartes> tapis, Cartes carte1, Cartes carte2)
         {
-            Combinaison = 0;
+            int Combinaison = 0;
 
             List<Cartes> list = new List<Cartes>();
             foreach (Cartes carte in tapis)
@@ -61,57 +60,57 @@ namespace PockerApp
             if (isQuinteFlushRoyale(list))
             {
                 Combinaison += 1000;
-                return;
+                return Combinaison;
             }
             if (isQuinteFlush(list))
             {
                 Combinaison += 900;
-                return;
+                return Combinaison;
             }
             if (isSquare(list))
             {
                 Combinaison += 800;
-                return;
+                return Combinaison;
             }
             if (isFull(list))
             {
                 Combinaison += 700;
-                return;
+                return Combinaison;
             }
             if (isColor(list))
             {
                 Combinaison += 600;
-                return;
+                return Combinaison;
             }
             if (isQuinte(list))
             {
                 Combinaison += 500;
-                return;
+                return Combinaison;
             }
             if(isBrelan(list))
             {
                 Combinaison += 400;
-                return;
+                return Combinaison;
             }
             if(isTwoPairs(list))
             {
                 Combinaison += 300;
-                return;
+                return Combinaison;
             }
             if(isPair(list))
             {
                 Combinaison += 200;
-                return;
+                return Combinaison;
             }
 
             else
             {
                 Combinaison += isDefault(list);
-                return;
+                return Combinaison;
             }
         }
 
-        public bool isQuinteFlushRoyale(List<Cartes> cartes)
+        public static bool  isQuinteFlushRoyale(List<Cartes> cartes)
         {
             List<Cartes> blacked = new List<Cartes>();
             List<Cartes> rouged = new List<Cartes>();
@@ -205,7 +204,7 @@ namespace PockerApp
 
         }
 
-        public bool isQuinteFlush(List<Cartes> cartes)
+        public  static bool isQuinteFlush(List<Cartes> cartes)
         {
             List<Cartes> blacked = new List<Cartes>();
             List<Cartes> rouged = new List<Cartes>();
@@ -286,7 +285,7 @@ namespace PockerApp
             return false;
         }
 
-        public bool isSquare(List<Cartes> cartes)
+        public  static bool isSquare(List<Cartes> cartes)
         {
             for (int i = 0; i < cartes.Count; i++)
             {
@@ -310,7 +309,7 @@ namespace PockerApp
             return false;
         }
 
-        public bool isFull(List<Cartes> cartes)
+        public  static bool isFull(List<Cartes> cartes)
         {
             SortByPower(cartes);
             int val = 0;
@@ -350,7 +349,7 @@ namespace PockerApp
             }
         }
 
-        public bool isColor(List<Cartes> cartes)
+        public static  bool isColor(List<Cartes> cartes)
         {
             List<Cartes> blacked = new List<Cartes>();
             List<Cartes> rouged = new List<Cartes>();
@@ -385,7 +384,7 @@ namespace PockerApp
             //il regarde si il y a 5 cartes noirs (si oui il renvoit true, sinon il regarde si il y a 5 >= cartes rouges si oui true sinon false. 
         }
 
-        public bool isQuinte(List<Cartes> cartes)
+        public  static bool isQuinte(List<Cartes> cartes)
         {
             SortByPower(cartes);
             int suite = 0;
@@ -445,7 +444,7 @@ namespace PockerApp
             return false;
         }
 
-        public bool isBrelan(List<Cartes> cartes)
+        public  static bool isBrelan(List<Cartes> cartes)
         {
             SortByPower(cartes);
             int same = 0;
@@ -467,7 +466,7 @@ namespace PockerApp
             return false;
         }
 
-        public bool isTwoPairs(List<Cartes> cartes)
+        public  static bool isTwoPairs(List<Cartes> cartes)
         {
             SortByPower(cartes);
             int nbPair = 0;
@@ -485,7 +484,7 @@ namespace PockerApp
             return false;
         }
 
-        public bool isPair(List<Cartes> cartes)
+        public static  bool isPair(List<Cartes> cartes)
         {
             SortByPower(cartes);
             for (int i = 0; i < cartes.Count - 1; i++)
@@ -498,7 +497,7 @@ namespace PockerApp
             return false;
         }
 
-        public int isDefault(List<Cartes> cartes)
+        public  static int isDefault(List<Cartes> cartes)
         {
             SortByPower(cartes);
             return cartes[cartes.Count - 1].Power;

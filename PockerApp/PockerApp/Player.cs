@@ -8,11 +8,11 @@ namespace PockerApp
 {
     internal class Player
     {
-        public Cartes Card1 { get; set; }
-        public Cartes Card2 { get; set; }
+        public Cartes? Card1 { get; set; }
+        public Cartes? Card2 { get; set; }
         public int Argent { get; set; }
         public bool IsOut { get; set; } 
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public bool IsCarpet { get; set; }   
         
         public Player(Cartes card1, Cartes card2, int argent, bool isOut, string name, bool isCarpet)
@@ -23,6 +23,11 @@ namespace PockerApp
             IsOut = isOut;
             Name = name.ToString();
             IsCarpet = isCarpet;
+        }
+
+        public Player()
+        {
+
         }
 
         public override string? ToString()
