@@ -37,8 +37,13 @@ public static class Program
 
 
         CreateRoom();
-        PrintGameDetails();    
+        LaunchGame();
+
+
+        //PrintGameDetails();    
     }
+
+    #region display
 
     public static void PrintGameDetails()
     {
@@ -84,6 +89,9 @@ public static class Program
 
     }
 
+    #endregion
+
+    
     private static void CreateRoom()
     {
         int prix;
@@ -103,7 +111,7 @@ public static class Program
             if (player.Argent < prix)
             {
                 Console.WriteLine("Player" + player.Name + ", you don't have enought money, you cannot participate to the game");
-                player.IsOut = false;
+                player.IsOut = true;
             }
             else
             {
@@ -131,6 +139,95 @@ public static class Program
                 }
             }
         }
+    }
+
+    private static void PreFlop()
+    {
+        int mise = 0;
+        foreach(var player in _Players)
+        {
+            DisplayPlayerCards(player);
+            int tmp = AskForBet(player);
+            if(tmp > mise)
+            {
+                mise = tmp;
+            }
+        }
+        foreach(var player in _Players)
+        {
+            AskForAlign(player, mise);
+        }
+
+        PrintGameDetails();
+
+    }
+
+    private static void LaunchGame()
+    {
+        PreFlop();
+    }
+
+    private static void AskForAlign(Player player, int mise)
+    {
+        if(player.Argent < mise)
+        {
+            player.IsOut = true;
+        }
+        else
+        {
+            System.Console.WriteLine("Player " + player.Name + " do you want to follow " 
+            + mise + "$" + " ? (y/n)");
+            AskForAlignError:
+            try
+            { 
+                string? res = Console.ReadLine();
+                if(res == null)
+                {
+                    goto AskForAlignError;
+                }
+                if(res == "y")
+                {
+                    player.Argent -= mise;
+                    MoneyStack += mise;
+                    return;
+                }
+                if(res == "n")
+                {
+                    player.IsOut = true;
+                }
+            }
+            catch(Exception)
+            {
+                Console.WriteLine("Input error retry");
+                goto AskForAlignError;
+            }
+        }
+    }
+
+    private static int AskForBet(Player player)
+    {
+        int a = 0;
+        System.Console.WriteLine("Joueur " + player.Name + " vous avez " + player.Argent + "$");
+        System.Console.WriteLine("Combien voulez vous miser ?");
+         AskForBetError:
+        try
+        {
+            a = System.Convert.ToInt32(Console.ReadLine());
+        }
+        catch(Exception)
+        {
+            System.Console.WriteLine("Erreur, veuillez réessayer");
+            goto AskForBetError;
+        }
+        return a;
+        
+    }
+
+    private static void DisplayPlayerCards(Player player)
+    {
+        System.Console.WriteLine("Joueur " + player.Name + " vous avez ces cartes en main : ");
+        System.Console.WriteLine(player.Card1);
+        System.Console.WriteLine(player.Card2);
     }
 
     private static List<Player> SetPlayers()
