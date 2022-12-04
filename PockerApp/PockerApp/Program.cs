@@ -1,38 +1,35 @@
-﻿using System.Runtime.Serialization.Formatters;
-using System.Security.Cryptography.X509Certificates;
+﻿using PockerApplication;
 
 namespace PockerApp;
 
-
-
 public static class Program
 {
-    internal static List<Cartes> _Cartes = new List<Cartes>();
-    internal static List<Player> _Players = new List<Player>();
-    internal static List<Cartes> _Table = new List<Cartes>();
+    private const int DefaultMoney = 1000;
+    private static List<Cartes> _card = new();
+    private static List<Player> _players = new();
+    private static List<Cartes> _table = new();
+    private static int _moneyStack;
 
-    internal static int DefaultMoney = 1000;
-    internal static int MoneyStack = 0;
-
-    public static Cartes GetAndRemoveCard()
+    private static Cartes GetAndRemoveCard()
     {
-        int number = GetRandomNumber(0, _Cartes.Count);
-        Cartes carte = _Cartes[number];
-        _Cartes.RemoveAt(number);
+        var number = GetRandomNumber(0, _card.Count);
+        var carte = _card[number];
+        _card.RemoveAt(number);
         return carte;
     }
-    public static int GetRandomNumber(int min, int max)
+
+    private static int GetRandomNumber(int min, int max)
     {
-        Random rnd = new Random();
-        int num = rnd.Next(min, max);
+        var rnd = new Random();
+        var num = rnd.Next(min, max);
         return num;
     }
 
     public static void Main(string[] args)
     {
-        _Cartes = Cartes.GenerateCard();
-        _Table = SetTable();
-        _Players = SetPlayers();
+        _card = Cartes.GenerateCard();
+        _table = SetTable();
+        _players = SetPlayers();
 
 
         CreateRoom();
@@ -42,59 +39,11 @@ public static class Program
         //PrintGameDetails();    
     }
 
-    #region display
-
-    public static void PrintGameDetails()
-    {
-        PrintCards();
-        PrintPlayers();
-        Console.WriteLine("Default Money : " + DefaultMoney + "Money stack : " + MoneyStack);
-        PrintTable();
-    }
-
-    public static void PrintTable()
-    {
-        Console.WriteLine("******************TABLE*****************");
-
-        foreach (var card in _Table)
-        {
-            Console.WriteLine(card.ToString());
-        }
-        Console.WriteLine("******************ENDTABLE*****************");
-    }
-
-    public static void PrintCards()
-    {
-        Console.WriteLine("******************CARDS*****************");
-
-        foreach (var card in _Cartes)
-        {
-            Console.WriteLine(card.ToString());
-        }
-        Console.WriteLine("******************END*****************");
-
-    }
-
-    public static void PrintPlayers()
-    {
-        Console.WriteLine("******************PLAYERS*****************");
-
-        foreach (var player in _Players)
-        {
-            Console.WriteLine(player.ToString());
-
-        }
-        Console.WriteLine("******************ENDPLAYERS*****************");
-
-    }
-
-    #endregion
-
 
     private static void CreateRoom()
     {
         int prix;
-    AutoResetEvent:
+        AutoResetEvent:
         Console.WriteLine("Merci d'entrer le prix d'entrée de la partie : ");
         try
         {
@@ -105,24 +54,26 @@ public static class Program
             Console.WriteLine("Input error");
             goto AutoResetEvent;
         }
-        foreach (var player in _Players)
-        {
+
+        foreach (var player in _players)
             if (player.Argent < prix)
             {
-                Console.WriteLine("Player" + player.Name + ", you don't have enought money, you cannot participate to the game");
+                Console.WriteLine("Player " + player.Name +
+                                  ", you don't have enought money, you cannot participate to the game");
                 player.IsOut = true;
             }
             else
             {
-            AutoResetPlayer:
-                Console.WriteLine("Player" + player.Name + ", in order to participate to the game you need to pay " + prix);
-                Console.WriteLine("Player" + player.Name + ", do you want to pay to play the game ? (y/n)");
-                string choice = Console.ReadLine()!;
+                AutoResetPlayer:
+                Console.WriteLine("Player " + player.Name + ", in order to participate to the game you need to pay " +
+                                  prix);
+                Console.WriteLine("Player " + player.Name + ", do you want to pay to play the game ? (y/n)");
+                var choice = Console.ReadLine()!;
                 if (choice == "y")
                 {
                     Console.WriteLine("Player " + player.Name + ", you are in the game !");
                     player.Argent -= prix;
-                    MoneyStack += prix;
+                    _moneyStack += prix;
                 }
                 else
                 {
@@ -137,208 +88,177 @@ public static class Program
                     }
                 }
             }
-        }
     }
-
 
 
     private static void LaunchGame()
     {
-        PrintWinner();
         PreFlop();
         Flop();
         Turn();
         River();
+        PrintWinner();
         PrintGameDetails();
     }
 
     private static void PrintWinner()
     {
-        Player winner = new Player();
-        int score = 0;
-        foreach (var player in _Players)
+        var winner = new Player();
+        var score = 0;
+        foreach (var player in _players.Where(player => player.IsOut == false).Where(player => 
+                     Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!) > score))
         {
-            if (player.IsOut == false)
-            {
-                if(Combinaisons.GetCombinaisons(_Table, player.Card1!, player.Card2!) > score)
-                {
-                    score = Combinaisons.GetCombinaisons(_Table, player.Card1!, player.Card2!);
-                    winner = player;
-                }
-            }
+            score = Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!);
+            winner = player;
         }
-        System.Console.WriteLine("Winner : " + winner.Name);
-        System.Console.WriteLine("Score : " + score);
 
+        Console.WriteLine("Winner : " + winner.Name);
+        Console.WriteLine("Score : " + score);
     }
 
     private static void Turn()
     {
         PrintPartialTable(4);
-        int mise = 0;
-        foreach (var player in _Players)
-        {
-            if (player.IsOut == false)
+        var mise = 0;
+        Player temporary = null!;
+        foreach (var player in _players.Where(player => player.IsOut == false))
+            if (player.IsCarpet is false)
             {
-                if (player.IsCarpet is false)
-                {
-                    DisplayPlayerCards(player);
-                    int tmp = AskForBet(player);
-                    if (tmp > mise)
-                    {
-                        mise = tmp;
-                    }
-                }
-                else
-                {
-                    System.Console.WriteLine("Player " + player.Name + " u r carpet skipping");
-                }
+                DisplayPlayerCards(player);
+                var tmp = AskForBet(player);
+                if (tmp <= mise) continue;
+                temporary = player;
+                mise = tmp;
             }
-        }
-        foreach (var player in _Players)
-        {
-            AskForAlign(player, mise);
-        }
+            else
+            {
+                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+            }
+
+        foreach (var player in _players) AskForAlign(player, temporary, mise);
     }
 
     private static void River()
     {
         PrintPartialTable(5);
-        int mise = 0;
-        foreach (var player in _Players)
-        {
-            if (player.IsOut == false)
+        var mise = 0;
+        Player temporary = null!;
+        foreach (var player in _players.Where(player => player.IsOut == false))
+            if (player.IsCarpet is false)
             {
-                if (player.IsCarpet is false)
-                {
-                    DisplayPlayerCards(player);
-                    int tmp = AskForBet(player);
-                    if (tmp > mise)
-                    {
-                        mise = tmp;
-                    }
-                }
-                else
-                {
-                    System.Console.WriteLine("Player " + player.Name + " u r carpet skipping");
-                }
+                DisplayPlayerCards(player);
+                var tmp = AskForBet(player);
+                if (tmp <= mise) continue;
+                temporary = player;
+                mise = tmp;
             }
-        }
-        foreach (var player in _Players)
-        {
-            AskForAlign(player, mise);
-        }
+            else
+            {
+                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+            }
+
+        foreach (var player in _players) AskForAlign(player, temporary, mise);
     }
 
     private static void Flop()
     {
         PrintPartialTable(3);
-        int mise = 0;
-        foreach (var player in _Players)
-        {
-            if (player.IsOut == false)
+        var mise = 0;
+        Player temporary = null!;
+        foreach (var player in _players.Where(player => player.IsOut == false))
+            if (player.IsCarpet is false)
             {
-                if (player.IsCarpet is false)
-                {
-                    DisplayPlayerCards(player);
-                    int tmp = AskForBet(player);
-                    if (tmp > mise)
-                    {
-                        mise = tmp;
-                    }
-                }
-                else
-                {
-                    System.Console.WriteLine("Player " + player.Name + " u r carpet skipping");
-                }
+                DisplayPlayerCards(player);
+                var tmp = AskForBet(player);
+                if (tmp <= mise) continue;
+                temporary = player;
+                mise = tmp;
             }
-        }
-        foreach (var player in _Players)
-        {
-            AskForAlign(player, mise);
-        }
+            else
+            {
+                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+            }
+
+        foreach (var player in _players) AskForAlign(player, temporary, mise);
     }
 
     private static void PreFlop()
     {
-        int mise = 0;
-        foreach (var player in _Players)
+        var mise = 0;
+        Player temporary = null!;
+        foreach (var player in _players)
         {
             DisplayPlayerCards(player);
-            int tmp = AskForBet(player);
-            if (tmp > mise)
-            {
-                mise = tmp;
-            }
+            var tmp = AskForBet(player);
+            if (tmp <= mise) continue;
+            temporary = player;
+            mise = tmp;
         }
-        foreach (var player in _Players)
-        {
-            AskForAlign(player, mise);
-        }
-    }
-    private static void PrintPartialTable(int index)
-    {
-        System.Console.WriteLine("Voici les cartes sur la table : ");
-        for (int i = 0; i < index; i++)
-        {
-            System.Console.WriteLine(
-                "   -" + i
-                + ") " + _Table[i].ToString()
-            );
-        }
+
+        foreach (var player in _players) AskForAlign(player,temporary, mise);
     }
 
-    private static void AskForAlign(Player player, int mise)
+    private static void PrintPartialTable(int index)
+    {
+        Console.WriteLine("Voici les cartes sur la table : ");
+        for (var i = 0; i < index; i++)
+            Console.WriteLine(
+                "   -" + i
+                       + ") " + _table[i]
+            );
+    }
+
+    private static void AskForAlign(Player player, Player better, int mise)
     {
         if (player.IsOut || player.IsCarpet)
         {
-            System.Console.WriteLine("Player " + player.Name + " u cannot align");
+            Console.WriteLine("Player " + player.Name + " u cannot align");
             return;
         }
+
         if (player.Argent < mise)
         {
-            System.Console.WriteLine("Player " + player.Name + " do you want to follow "
-           + mise + "$" + " ? (y/n)");
-            System.Console.WriteLine("Your current balance is " + player.Argent);
-        error1237:
-            string? res = Console.ReadLine();
-            if (res == "y")
-            {
-                player.IsCarpet = true;
-            }
+            Console.WriteLine("Player " + player.Name + " do you want to follow "
+                              + mise + "$" + " ? (y/n)");
+            Console.WriteLine("Your current balance is " + player.Argent);
+            error1237:
+            var res = Console.ReadLine();
+            if (res == "y") player.IsCarpet = true;
             if (res == "n")
             {
                 player.IsOut = true;
             }
             else
             {
-                System.Console.WriteLine("error, please retry");
+                Console.WriteLine("error, please retry");
                 goto error1237;
             }
-
-
         }
         else
         {
-            System.Console.WriteLine("Player " + player.Name + " do you want to follow "
-            + mise + "$" + " ? (y/n)");
-        AskForAlignError:
+            if (player == better)
+            {
+                player.Argent -= mise;
+                _moneyStack += mise;
+                return;
+            }
+            Console.WriteLine("Player " + player.Name + " do you want to follow "
+                              + mise + "$" + " ? (y/n)");
+            AskForAlignError:
             try
             {
-                string? res = Console.ReadLine();
-                if (res == null)
+                var res = Console.ReadLine();
+                switch (res)
                 {
-                    goto AskForAlignError;
-                }
-                if (res == "y")
-                {
-                    player.Argent -= mise;
-                    MoneyStack += mise;
-                    return;
-                }
-                if (res == "n")
-                {
-                    player.IsOut = true;
+                    case null:
+                        goto AskForAlignError;
+                    case "y":
+                        player.Argent -= mise;
+                        _moneyStack += mise;
+                        return;
+                    case "n":
+                        player.IsOut = true;
+                        break;
                 }
             }
             catch (Exception)
@@ -351,42 +271,41 @@ public static class Program
 
     private static int AskForBet(Player player)
     {
-        int a = 0;
-        System.Console.WriteLine("Joueur " + player.Name + " vous avez " + player.Argent + "$");
-        System.Console.WriteLine("Combien voulez vous miser ?");
-    AskForBetError:
+        int a;
+        Console.WriteLine("Joueur " + player.Name + " vous avez " + player.Argent + "$");
+        Console.WriteLine("Combien voulez vous miser ?");
+        AskForBetError:
         try
         {
-            a = System.Convert.ToInt32(Console.ReadLine());
+            a = Convert.ToInt32(Console.ReadLine());
             if (a > player.Argent)
             {
-                System.Console.WriteLine("You don't have enought money petit chenapan !");
+                Console.WriteLine("You don't have enought money petit chenapan !");
                 goto AskForBetError;
-
             }
         }
         catch (Exception)
         {
-            System.Console.WriteLine("Erreur, veuillez réessayer");
+            Console.WriteLine("Erreur, veuillez réessayer");
             goto AskForBetError;
         }
-        return a;
 
+        return a;
     }
 
     private static void DisplayPlayerCards(Player player)
     {
-        System.Console.WriteLine("Joueur " + player.Name + " vous avez ces cartes en main : ");
-        System.Console.WriteLine(player.Card1);
-        System.Console.WriteLine(player.Card2);
+        Console.WriteLine("Joueur " + player.Name + " vous avez ces cartes en main : ");
+        Console.WriteLine(player.Card1);
+        Console.WriteLine(player.Card2);
     }
 
     private static List<Player> SetPlayers()
     {
         int nbPlayers;
-        List<Player> playsersList = new List<Player>();
+        var playsersList = new List<Player>();
         Console.WriteLine("How many players will play ? ");
-    AutoResetEvent:
+        AutoResetEvent:
         try
         {
             nbPlayers = Convert.ToInt32(Console.ReadLine());
@@ -401,32 +320,66 @@ public static class Program
             Console.WriteLine("Input error");
             goto AutoResetEvent;
         }
-        for (int i = 0; i < nbPlayers; i++)
+
+        for (var i = 0; i < nbPlayers; i++)
         {
             Console.WriteLine("Input Name for player {0}", i);
-            string name = Console.ReadLine()!;
-            Player player = new Player
-                (
-                    Program.GetAndRemoveCard(),
-                    Program.GetAndRemoveCard(),
-                    Program.DefaultMoney,
-                    false,
-                    name,
-                    false
-                );
+            var name = Console.ReadLine()!;
+            var player = new Player
+            (
+                GetAndRemoveCard(),
+                GetAndRemoveCard(),
+                DefaultMoney,
+                false,
+                name,
+                false
+            );
             playsersList.Add(player);
         }
+
         return playsersList;
     }
 
     private static List<Cartes> SetTable()
     {
-        List<Cartes> table = new List<Cartes>();
-        for (int i = 0; i < 5; i++)
-        {
-            table.Add(GetAndRemoveCard());
-        }
+        var table = new List<Cartes>();
+        for (var i = 0; i < 5; i++) table.Add(GetAndRemoveCard());
         return table;
     }
 
+    #region display
+
+    private static void PrintGameDetails()
+    {
+        PrintCards();
+        PrintPlayers();
+        Console.WriteLine("Default Money : " + DefaultMoney + "Money stack : " + _moneyStack);
+        PrintTable();
+    }
+
+    private static void PrintTable()
+    {
+        Console.WriteLine("******************TABLE*****************");
+
+        foreach (var card in _table) Console.WriteLine(card.ToString());
+        Console.WriteLine("******************ENDTABLE*****************");
+    }
+
+    private static void PrintCards()
+    {
+        Console.WriteLine("******************CARDS*****************");
+
+        foreach (var card in _card) Console.WriteLine(card.ToString());
+        Console.WriteLine("******************END*****************");
+    }
+
+    private static void PrintPlayers()
+    {
+        Console.WriteLine("******************PLAYERS*****************");
+
+        foreach (var player in _players) Console.WriteLine(player.ToString());
+        Console.WriteLine("******************ENDPLAYERS*****************");
+    }
+
+    #endregion
 }

@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace PockerApplication;
 
-namespace PockerApp
+internal class GameManager
 {
-    internal class GameManager
-    {
-        
-    }
 }
