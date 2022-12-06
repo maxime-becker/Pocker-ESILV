@@ -30,8 +30,9 @@ public static class Program
         _card = Cartes.GenerateCard();
         _table = SetTable();
         _players = SetPlayers();
-
-
+        GameManager.PrintTable(new List<Cartes> { _card[0] });
+        Console.ReadLine();
+        return;
         CreateRoom();
         LaunchGame();
 
@@ -69,23 +70,19 @@ public static class Program
                                   prix);
                 Console.WriteLine("Player " + player.Name + ", do you want to pay to play the game ? (y/n)");
                 var choice = Console.ReadLine()!;
-                if (choice == "y")
+                switch (choice)
                 {
-                    Console.WriteLine("Player " + player.Name + ", you are in the game !");
-                    player.Argent -= prix;
-                    _moneyStack += prix;
-                }
-                else
-                {
-                    if (choice == "n")
-                    {
+                    case "y":
+                        Console.WriteLine("Player " + player.Name + ", you are in the game !");
+                        player.Argent -= prix;
+                        _moneyStack += prix;
+                        break;
+                    case "n":
                         Console.WriteLine("Player " + player.Name + ", you are not in the game !");
-                    }
-                    else
-                    {
+                        break;
+                    default:
                         Console.WriteLine("input error; restarting...");
                         goto AutoResetPlayer;
-                    }
                 }
             }
     }
@@ -98,14 +95,13 @@ public static class Program
         Turn();
         River();
         PrintWinner();
-        PrintGameDetails();
     }
 
     private static void PrintWinner()
     {
         var winner = new Player();
         var score = 0;
-        foreach (var player in _players.Where(player => player.IsOut == false).Where(player => 
+        foreach (var player in _players.Where(player => player.IsOut == false).Where(player =>
                      Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!) > score))
         {
             score = Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!);
@@ -195,7 +191,7 @@ public static class Program
             mise = tmp;
         }
 
-        foreach (var player in _players) AskForAlign(player,temporary, mise);
+        foreach (var player in _players) AskForAlign(player, temporary, mise);
     }
 
     private static void PrintPartialTable(int index)
@@ -242,6 +238,7 @@ public static class Program
                 _moneyStack += mise;
                 return;
             }
+
             Console.WriteLine("Player " + player.Name + " do you want to follow "
                               + mise + "$" + " ? (y/n)");
             AskForAlignError:

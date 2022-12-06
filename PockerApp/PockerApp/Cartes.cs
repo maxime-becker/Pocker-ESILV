@@ -2,7 +2,7 @@
 
 public class Cartes
 {
-    private Cartes(int number, string symbole, int power) //création de ma carte 
+    public Cartes(int number, string symbole, int power) //création de ma carte 
     {
         Number = number switch
         {
