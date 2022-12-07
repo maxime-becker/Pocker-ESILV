@@ -6,20 +6,51 @@ internal class GameManager
     private static int Height;
     private static char[,] array;
 
-    private static void InitDisplay()
+    public static void InitDisplay()
     {
+        Console.WriteLine("Ce programme doit être lancé en mode plein écran afin de fonctionner sans erreur.");
+        Console.WriteLine("Merci d'appuyer sur entrée lorsque la fenêtre est en mode plein écran");
+        Console.ReadLine();
+
         Width = Console.WindowWidth;
         Height = Console.WindowHeight;
         array = new char[Height, Width];
+        var text = @"''
+        ' (                                                                                                               '
+        ' )\ )              )                 )                                            (                           )  '
+        '(()/(           ( /(    (   (     ( /(  (         )       )     )      )          )\ )   (       )         ( /(  '
+        ' /(_)) (    (   )\())  ))\  )(    )\()) )\ )     (     ( /(  ( /(   ( /(   (     (()/(   )(   ( /(  `  )   )\()) '
+        '(_))   )\   )\ ((_)\  /((_)(()\  ((_)\ (()/(     )\  ' )(_)) )\())  )(_))  )\ )   ((_)) (()\  )(_)) /(/(  ((_)\  '
+        '| _ \ ((_) ((_)| |(_)(_))   ((_) | |(_) )(_))  _((_)) ((_)_ ((_)\  ((_)_  _(_/(   _| |   ((_)((_)_ ((_)_\ | |(_) '
+        '|  _// _ \/ _| | / / / -_) | '_| | '_ \| || | | '  \()/ _` |\ \ /  / _` || ' \))/ _` |  | '_|/ _` || '_ \)| ' \  '
+        '|_|  \___/\__| |_\_\ \___| |_|   |_.__/ \_, | |_|_|_| \__,_|/_\_\  \__,_||_||_| \__,_|  |_|  \__,_|| .__/ |_||_| '
+        '                                        |__/                                                       |_|           '
+        ''";
+        Console.WriteLine(text);
     }
 
-    public static void PrintTable(List<Cartes> cardList)
+    public static void PrintRound(List<Cartes> cardList, int number, Player player)
     {
-        InitDisplay();
         ResetDisplay();
-        foreach (var card in cardList) AddTextToArray(Height / 2 - 3, Width / 2 - 3, CardToString(card));
-
+        PrintTable(cardList, number);
+        PrintPlayerCard(player);
         UpdateScreen();
+    }
+
+    public static void PrintTable(List<Cartes> cardList, int number)
+    {
+        var decalage = -number / 2;
+        for (var i = 0; i < number; i++)
+        {
+            AddTextToArray(Height / 2 - 3, Width / 2 - 3 + decalage * 10, CardToString(cardList[i]));
+            decalage++;
+        }
+    }
+
+    public static void PrintPlayerCard(Player player)
+    {
+        AddTextToArray(Height / 2 + 10, Width / 2 - 6, CardToString(player.Card1!));
+        AddTextToArray(Height / 2 + 10, Width / 2 + 6, CardToString(player.Card2!));
     }
 
     private static void AddTextToArray(int x, int y, string text)

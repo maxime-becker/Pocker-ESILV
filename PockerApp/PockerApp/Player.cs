@@ -1,6 +1,4 @@
-﻿using PockerApp;
-
-namespace PockerApplication;
+﻿namespace PockerApp;
 
 internal class Player
 {

@@ -1,6 +1,4 @@
-﻿using PockerApplication;
-
-namespace PockerApp;
+﻿namespace PockerApp;
 
 public static class Program
 {
@@ -27,12 +25,11 @@ public static class Program
 
     public static void Main(string[] args)
     {
+        GameManager.InitDisplay();
         _card = Cartes.GenerateCard();
         _table = SetTable();
         _players = SetPlayers();
-        GameManager.PrintTable(new List<Cartes> { _card[0] });
         Console.ReadLine();
-        return;
         CreateRoom();
         LaunchGame();
 
@@ -87,7 +84,6 @@ public static class Program
             }
     }
 
-
     private static void LaunchGame()
     {
         PreFlop();
@@ -114,13 +110,12 @@ public static class Program
 
     private static void Turn()
     {
-        PrintPartialTable(4);
         var mise = 0;
         Player temporary = null!;
         foreach (var player in _players.Where(player => player.IsOut == false))
             if (player.IsCarpet is false)
             {
-                DisplayPlayerCards(player);
+                GameManager.PrintRound(_table, 4, player);
                 var tmp = AskForBet(player);
                 if (tmp <= mise) continue;
                 temporary = player;
@@ -136,13 +131,12 @@ public static class Program
 
     private static void River()
     {
-        PrintPartialTable(5);
         var mise = 0;
         Player temporary = null!;
         foreach (var player in _players.Where(player => player.IsOut == false))
             if (player.IsCarpet is false)
             {
-                DisplayPlayerCards(player);
+                GameManager.PrintRound(_table, 5, player);
                 var tmp = AskForBet(player);
                 if (tmp <= mise) continue;
                 temporary = player;
@@ -158,13 +152,13 @@ public static class Program
 
     private static void Flop()
     {
-        PrintPartialTable(3);
+        GameManager.PrintTable(_table, 3);
         var mise = 0;
         Player temporary = null!;
         foreach (var player in _players.Where(player => player.IsOut == false))
             if (player.IsCarpet is false)
             {
-                DisplayPlayerCards(player);
+                GameManager.PrintRound(_table, 3, player);
                 var tmp = AskForBet(player);
                 if (tmp <= mise) continue;
                 temporary = player;
@@ -184,7 +178,7 @@ public static class Program
         Player temporary = null!;
         foreach (var player in _players)
         {
-            DisplayPlayerCards(player);
+            GameManager.PrintRound(_table, 0, player);
             var tmp = AskForBet(player);
             if (tmp <= mise) continue;
             temporary = player;
@@ -192,16 +186,6 @@ public static class Program
         }
 
         foreach (var player in _players) AskForAlign(player, temporary, mise);
-    }
-
-    private static void PrintPartialTable(int index)
-    {
-        Console.WriteLine("Voici les cartes sur la table : ");
-        for (var i = 0; i < index; i++)
-            Console.WriteLine(
-                "   -" + i
-                       + ") " + _table[i]
-            );
     }
 
     private static void AskForAlign(Player player, Player better, int mise)
