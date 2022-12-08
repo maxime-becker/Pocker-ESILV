@@ -4,7 +4,7 @@ public static class Program
 {
     private const int DefaultMoney = 1000;
     private static List<Cartes> _card = new();
-    private static List<Player> _players = new();
+    private static readonly List<Player> _players = new();
     private static List<Cartes> _table = new();
     private static int _moneyStack;
 
@@ -25,11 +25,11 @@ public static class Program
 
     public static void Main(string[] args)
     {
+        Console.Clear();
         GameManager.InitDisplay();
         _card = Cartes.GenerateCard();
-        Cartes.WriteCards(_card);
         _table = SetTable();
-        _players = SetPlayers();
+        CreateOrLoadPlayers();
         CreateRoom();
         LaunchGame();
 
@@ -86,11 +86,31 @@ public static class Program
 
     private static void LaunchGame()
     {
-        PreFlop();
-        Flop();
-        Turn();
-        River();
+        if (CheckIfAlone()) PreFlop();
+        if (CheckIfAlone()) Flop();
+        if (CheckIfAlone()) Turn();
+        if (CheckIfAlone()) River();
         PrintWinner();
+        UpdateData();
+    }
+
+    public static bool CheckIfAlone()
+    {
+        var cnt = 0;
+        foreach (var player in _players)
+            if (!player.IsOut)
+                cnt++;
+        if (cnt == 1)
+            return false;
+        return true;
+    }
+
+    public static void UpdateData()
+    {
+        foreach (var players in _players)
+            File.WriteAllText(@"players\" + players.Name + ".csv", players.Argent.ToString());
+
+        if (SafeBoolUserInput("Do you want to play another game ?")) Main(null);
     }
 
     private static void PrintWinner()
@@ -211,15 +231,18 @@ public static class Program
             Console.WriteLine("Your current balance is " + player.Argent);
             error1237:
             var res = Console.ReadLine();
-            if (res == "y") player.IsCarpet = true;
-            if (res == "n")
+            switch (res)
             {
-                player.IsOut = true;
-            }
-            else
-            {
-                Console.WriteLine("error, please retry");
-                goto error1237;
+                case "y":
+                    player.IsCarpet = true;
+                    player.Argent = 0;
+                    break;
+                case "n":
+                    player.IsOut = true;
+                    break;
+                default:
+                    Console.WriteLine("error, please retry");
+                    goto error1237;
             }
         }
         else
@@ -258,69 +281,155 @@ public static class Program
         }
     }
 
+    public static void Transition(string name)
+    {
+        Console.WriteLine("C'est le tour de " + name);
+        Thread.Sleep(3000);
+        Console.Clear();
+    }
+
     private static int AskForBet(Player player)
     {
+        Transition(player.Name!);
         int a;
         Console.WriteLine("Joueur " + player.Name + " vous avez " + player.Argent + "$");
         Console.WriteLine("Combien voulez vous miser ?");
-        AskForBetError:
+        Jesaisquejépaldroitmaissivouplé:
         try
         {
             a = Convert.ToInt32(Console.ReadLine());
+
+
             if (a > player.Argent)
             {
                 Console.WriteLine("You don't have enought money petit chenapan !");
-                goto AskForBetError;
+                goto Jesaisquejépaldroitmaissivouplé;
             }
         }
         catch (Exception)
         {
             Console.WriteLine("Erreur, veuillez réessayer");
-            goto AskForBetError;
+            goto Jesaisquejépaldroitmaissivouplé;
         }
 
         return a;
     }
 
-    private static List<Player> SetPlayers()
+    private static void CreateOrLoadPlayers()
     {
-        int nbPlayers;
-        var playsersList = new List<Player>();
-        Console.WriteLine("How many players will play ? ");
-        AutoResetEvent:
+        while (true)
+        {
+            if (!Directory.Exists("players")) Directory.CreateDirectory("players");
+
+            ReadPlayers();
+            while (SafeBoolUserInput("Do you want to create others players ? (y/n)")) CreateAndSavePlayer();
+
+            if (_players.Count < 2)
+            {
+                Console.WriteLine("Il manque des joueurs");
+                continue;
+            }
+
+            break;
+        }
+    }
+
+    public static void ReadPlayers()
+    {
+        Console.WriteLine("There is " + Directory.GetFiles("players/").Length + " registered accounts");
+        foreach (var variable in Directory.GetFiles("players/"))
+        {
+            Console.WriteLine("Profile " + Path.GetFileName(variable) + " found");
+            Console.WriteLine("Do you want player " + Path.GetFileName(variable) + " to play ?");
+            if (SafeBoolUserInput(""))
+            {
+                var player = new Player
+                (
+                    GetAndRemoveCard(),
+                    GetAndRemoveCard(),
+                    Convert.ToInt32(File.ReadAllText(variable)),
+                    false,
+                    Path.GetFileName(variable)[..(Path.GetFileName(variable).Length - 4)],
+                    false
+                );
+                _players.Add(player);
+            }
+        }
+    }
+
+    private static void CreateAndSavePlayer()
+    {
+        Console.WriteLine("Write player name :");
+        var name = SafeStringUserInput();
+        Console.WriteLine("Write how much money this player have : ");
+        var money = SafeIntUserInput();
+        File.WriteAllText("players/" + name + ".csv", money.ToString());
+        var player = new Player
+        (
+            GetAndRemoveCard(),
+            GetAndRemoveCard(),
+            Convert.ToInt32(File.ReadAllText("players/" + name + ".csv")),
+            false,
+            Path.GetFileName(Path.GetFileName("players/" + name + ".csv")),
+            false
+        );
+        _players.Add(player);
+    }
+
+    private static bool SafeBoolUserInput(string s)
+    {
+        Console.WriteLine(s);
         try
         {
-            nbPlayers = Convert.ToInt32(Console.ReadLine());
-            if (nbPlayers < 2)
+            var res = Console.ReadLine();
+            switch (res)
             {
-                Console.WriteLine("Program needs 2+ players");
-                goto AutoResetEvent;
+                case "y":
+                    return true;
+                case "n":
+                    return false;
+                default:
+                    Console.WriteLine("Entrée non valide");
+                    return SafeBoolUserInput(s);
             }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Entrée non valide");
+            return SafeBoolUserInput(s);
+        }
+    }
+
+    private static string SafeStringUserInput()
+    {
+        try
+        {
+            var res = Console.ReadLine();
+            if (res is null) throw new Exception();
+            return res;
         }
         catch (Exception)
         {
-            Console.WriteLine("Input error");
-            goto AutoResetEvent;
+            Console.WriteLine("Entrée non valide");
+            return SafeStringUserInput();
         }
-
-        for (var i = 0; i < nbPlayers; i++)
-        {
-            Console.WriteLine("Merci de taper le nom du joueur " + i);
-            var name = Console.ReadLine()!;
-            var player = new Player
-            (
-                GetAndRemoveCard(),
-                GetAndRemoveCard(),
-                DefaultMoney,
-                false,
-                name,
-                false
-            );
-            playsersList.Add(player);
-        }
-
-        return playsersList;
     }
+
+    private static int SafeIntUserInput()
+    {
+        try
+        {
+            var res = Convert.ToInt32(Console.ReadLine());
+            return res;
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Entrée non valide");
+            return SafeIntUserInput();
+        }
+    }
+
+    #region set
 
     private static List<Cartes> SetTable()
     {
@@ -328,6 +437,8 @@ public static class Program
         for (var i = 0; i < 5; i++) table.Add(GetAndRemoveCard());
         return table;
     }
+
+    #endregion
 
     #region display
 
