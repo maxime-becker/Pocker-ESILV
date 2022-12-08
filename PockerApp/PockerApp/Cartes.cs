@@ -26,6 +26,18 @@ public class Cartes
         return "Symbole : " + Symbole + " /  Numero : " + Number + "  /  Power : " + Power;
     }
 
+    public static void WriteCards(List<Cartes> cartesList)
+    {
+        if (!Directory.Exists("cartes"))
+            Directory.CreateDirectory("cartes");
+        var i = 0;
+        foreach (var carte in cartesList)
+        {
+            File.WriteAllText(@"cartes\" + i + ".txt", GameManager.CardToString(carte));
+            i++;
+        }
+    }
+
     public static List<Cartes> GenerateCard()
     {
         var cards = new List<Cartes>();

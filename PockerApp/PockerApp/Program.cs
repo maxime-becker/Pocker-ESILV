@@ -27,13 +27,13 @@ public static class Program
     {
         GameManager.InitDisplay();
         _card = Cartes.GenerateCard();
+        Cartes.WriteCards(_card);
         _table = SetTable();
         _players = SetPlayers();
-        Console.ReadLine();
         CreateRoom();
         LaunchGame();
 
-
+        Console.ReadLine();
         //PrintGameDetails();    
     }
 
@@ -56,26 +56,26 @@ public static class Program
         foreach (var player in _players)
             if (player.Argent < prix)
             {
-                Console.WriteLine("Player " + player.Name +
-                                  ", you don't have enought money, you cannot participate to the game");
+                Console.WriteLine("Joueur " + player.Name +
+                                  ", vous n'avez pas assez d'argent pour participer au jeu");
                 player.IsOut = true;
             }
             else
             {
                 AutoResetPlayer:
-                Console.WriteLine("Player " + player.Name + ", in order to participate to the game you need to pay " +
-                                  prix);
-                Console.WriteLine("Player " + player.Name + ", do you want to pay to play the game ? (y/n)");
+                Console.WriteLine("Joueur " + player.Name + ", pour jouer vous devez payer "
+                                  + prix + "$");
+                Console.WriteLine("Joueur " + player.Name + ", voulez vous payer pour rejoindre la partie ? (y/n)");
                 var choice = Console.ReadLine()!;
                 switch (choice)
                 {
                     case "y":
-                        Console.WriteLine("Player " + player.Name + ", you are in the game !");
+                        Console.WriteLine("Joueur " + player.Name + ", vous êtes dans la partie !");
                         player.Argent -= prix;
                         _moneyStack += prix;
                         break;
                     case "n":
-                        Console.WriteLine("Player " + player.Name + ", you are not in the game !");
+                        Console.WriteLine("Joueur " + player.Name + ", vous n'êtes pas dans la partie !");
                         break;
                     default:
                         Console.WriteLine("input error; restarting...");
@@ -104,8 +104,15 @@ public static class Program
             winner = player;
         }
 
-        Console.WriteLine("Winner : " + winner.Name);
-        Console.WriteLine("Score : " + score);
+        winner.Argent += _moneyStack;
+        _moneyStack = 0;
+        Console.WriteLine("Ths Winner is " + winner.Name);
+        Console.WriteLine("with score : " + score);
+        foreach (var player in _players)
+        {
+            player.IsOut = false;
+            player.IsCarpet = false;
+        }
     }
 
     private static void Turn()
@@ -190,6 +197,7 @@ public static class Program
 
     private static void AskForAlign(Player player, Player better, int mise)
     {
+        Console.Clear();
         if (player.IsOut || player.IsCarpet)
         {
             Console.WriteLine("Player " + player.Name + " u cannot align");
@@ -274,13 +282,6 @@ public static class Program
         return a;
     }
 
-    private static void DisplayPlayerCards(Player player)
-    {
-        Console.WriteLine("Joueur " + player.Name + " vous avez ces cartes en main : ");
-        Console.WriteLine(player.Card1);
-        Console.WriteLine(player.Card2);
-    }
-
     private static List<Player> SetPlayers()
     {
         int nbPlayers;
@@ -304,7 +305,7 @@ public static class Program
 
         for (var i = 0; i < nbPlayers; i++)
         {
-            Console.WriteLine("Input Name for player {0}", i);
+            Console.WriteLine("Merci de taper le nom du joueur " + i);
             var name = Console.ReadLine()!;
             var player = new Player
             (

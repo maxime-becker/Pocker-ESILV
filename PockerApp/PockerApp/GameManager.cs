@@ -11,7 +11,7 @@ internal class GameManager
         Console.WriteLine("Ce programme doit être lancé en mode plein écran afin de fonctionner sans erreur.");
         Console.WriteLine("Merci d'appuyer sur entrée lorsque la fenêtre est en mode plein écran");
         Console.ReadLine();
-
+        Console.Clear();
         Width = Console.WindowWidth;
         Height = Console.WindowHeight;
         array = new char[Height, Width];
@@ -69,7 +69,7 @@ internal class GameManager
             }
     }
 
-    private static string CardToString(Cartes carte)
+    public static string CardToString(Cartes carte)
     {
         string l1, l2, l3, l4, l5, l6;
 
@@ -122,6 +122,43 @@ internal class GameManager
 
         var res = l1 + l2 + l3 + l4 + l5 + l6;
         return res;
+    }
+
+    public static string CartesToStringAlt(Cartes carte)
+    {
+        var power = carte.Power;
+        var res = 0;
+        while (power > 2)
+        {
+            res += 4;
+            power--;
+        }
+
+        if (carte.Symbole == "Pique")
+        {
+            res += 0;
+            return File.ReadAllText("cartes/" + res + ".txt");
+        }
+
+        if (carte.Symbole == "Trefle")
+        {
+            res += 1;
+            return File.ReadAllText("cartes/" + res + ".txt");
+        }
+
+        if (carte.Symbole == "Carreau")
+        {
+            res += 2;
+            return File.ReadAllText("cartes/" + res + ".txt");
+        }
+
+        if (carte.Symbole == "Coeur")
+        {
+            res += 3;
+            return File.ReadAllText("cartes/" + res + ".txt");
+        }
+
+        return "N/A";
     }
 
     private static void ResetDisplay()
