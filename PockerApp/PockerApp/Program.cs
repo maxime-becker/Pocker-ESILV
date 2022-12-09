@@ -7,8 +7,9 @@ public static class Program
     private static readonly List<Player> _players = new();
     private static List<Cartes> _table = new();
     private static int _moneyStack;
+    private static Logs _logs;
 
-    private static Cartes GetAndRemoveCard()
+    private static Cartes GetAndRemoveCard() // retire une carte du paquet et la retourne
     {
         var number = GetRandomNumber(0, _card.Count);
         var carte = _card[number];
@@ -16,7 +17,7 @@ public static class Program
         return carte;
     }
 
-    private static int GetRandomNumber(int min, int max)
+    private static int GetRandomNumber(int min, int max) // Donne un nombre entre min et max aléatoirement
     {
         var rnd = new Random();
         var num = rnd.Next(min, max);
@@ -25,6 +26,7 @@ public static class Program
 
     public static void Main(string[] args)
     {
+        _logs = new Logs("Launching game...");
         Console.Clear();
         GameManager.InitDisplay();
         _card = Cartes.GenerateCard();
@@ -40,12 +42,14 @@ public static class Program
 
     private static void CreateRoom()
     {
+        _logs.LogWrite("Création d'une salle de jeux en cours");
         int prix;
         AutoResetEvent:
         Console.WriteLine("Merci d'entrer le prix d'entrée de la partie : ");
         try
         {
             prix = Convert.ToInt32(Console.ReadLine());
+            _logs.LogWrite("Le prix de la partie est : " + prix);
         }
         catch (Exception)
         {
@@ -58,6 +62,9 @@ public static class Program
             {
                 Console.WriteLine("Joueur " + player.Name +
                                   ", vous n'avez pas assez d'argent pour participer au jeu");
+                _logs.LogWrite("Joueur " + player.Name +
+                               ", ne peut pas participer");
+
                 player.IsOut = true;
             }
             else
@@ -71,17 +78,23 @@ public static class Program
                 {
                     case "y":
                         Console.WriteLine("Joueur " + player.Name + ", vous êtes dans la partie !");
+                        _logs.LogWrite("Joueur " + player.Name +
+                                       ", joue !");
                         player.Argent -= prix;
                         _moneyStack += prix;
                         break;
                     case "n":
                         Console.WriteLine("Joueur " + player.Name + ", vous n'êtes pas dans la partie !");
+                        _logs.LogWrite("Joueur " + player.Name +
+                                       ", ne joue pas !");
                         break;
                     default:
-                        Console.WriteLine("input error; restarting...");
+                        Console.WriteLine("erreur");
                         goto AutoResetPlayer;
                 }
             }
+
+        _logs.LogWrite("Création d'une salle de jeux terminée");
     }
 
     private static void LaunchGame()
@@ -94,7 +107,7 @@ public static class Program
         UpdateData();
     }
 
-    public static bool CheckIfAlone()
+    public static bool CheckIfAlone() // Vérifie si il reste un joueur au moins
     {
         var cnt = 0;
         foreach (var player in _players)
@@ -105,20 +118,24 @@ public static class Program
         return true;
     }
 
-    public static void UpdateData()
+    public static void UpdateData() // Fin de partie dans les fichiers 
     {
+        _logs.LogWrite(@"Mise à jour des données des joueurs");
         foreach (var players in _players)
             File.WriteAllText(@"players\" + players.Name + ".csv", players.Argent.ToString());
+        _logs.LogWrite(@"Mise à jour des données des joueurs faite");
 
-        if (SafeBoolUserInput("Do you want to play another game ?")) Main(null);
+        if (SafeBoolUserInput("Voulez vous relancer une partie ?")) Main(null);
     }
 
-    private static void PrintWinner()
+    private static void PrintWinner() // Affichage du winner 
     {
         var winner = new Player();
         var score = 0;
-        foreach (var player in _players.Where(player => player.IsOut == false).Where(player =>
-                     Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!) > score))
+        foreach (var player in _players.Where(player => player.IsOut == false).Where(
+                     player => //LINQ optimisiation proposée par visual studio je cherche parmi les joueurs 
+                         Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!) >
+                         score)) // En jeu, celui qui a le plus haut score
         {
             score = Combinaisons.GetCombinaisons(_table, player.Card1!, player.Card2!);
             winner = player;
@@ -150,7 +167,7 @@ public static class Program
             }
             else
             {
-                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+                Console.WriteLine("Player " + player.Name + " tapis");
             }
 
         foreach (var player in _players) AskForAlign(player, temporary, mise);
@@ -171,7 +188,7 @@ public static class Program
             }
             else
             {
-                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+                Console.WriteLine("Player " + player.Name + " tapis");
             }
 
         foreach (var player in _players) AskForAlign(player, temporary, mise);
@@ -193,7 +210,7 @@ public static class Program
             }
             else
             {
-                Console.WriteLine("Player " + player.Name + " u r carpet skipping");
+                Console.WriteLine("Player " + player.Name + " tapis");
             }
 
         foreach (var player in _players) AskForAlign(player, temporary, mise);
@@ -215,20 +232,21 @@ public static class Program
         foreach (var player in _players) AskForAlign(player, temporary, mise);
     }
 
-    private static void AskForAlign(Player player, Player better, int mise)
+    private static void
+        AskForAlign(Player player, Player better, int mise) // Demande aux joueur de s'aligner sur la mise la plus haute
     {
         Console.Clear();
         if (player.IsOut || player.IsCarpet)
         {
-            Console.WriteLine("Player " + player.Name + " u cannot align");
+            Console.WriteLine("Player " + player.Name + " vous ne pouvez pas vous alligner");
             return;
         }
 
         if (player.Argent < mise)
         {
-            Console.WriteLine("Player " + player.Name + " do you want to follow "
+            Console.WriteLine("Player " + player.Name + " voulez vous suivre la plus grosse mise ? "
                               + mise + "$" + " ? (y/n)");
-            Console.WriteLine("Your current balance is " + player.Argent);
+            Console.WriteLine("Argent sur le compte : " + player.Argent);
             error1237:
             var res = Console.ReadLine();
             switch (res)
@@ -254,7 +272,7 @@ public static class Program
                 return;
             }
 
-            Console.WriteLine("Player " + player.Name + " do you want to follow "
+            Console.WriteLine("Joueur " + player.Name + " voulez vous suivre la mise "
                               + mise + "$" + " ? (y/n)");
             AskForAlignError:
             try
@@ -281,14 +299,14 @@ public static class Program
         }
     }
 
-    public static void Transition(string name)
+    public static void Transition(string name) // petite transition entre joueurs 
     {
         Console.WriteLine("C'est le tour de " + name);
         Thread.Sleep(3000);
         Console.Clear();
     }
 
-    private static int AskForBet(Player player)
+    private static int AskForBet(Player player) // Demande aux joueurs de parier 
     {
         Transition(player.Name!);
         int a;
@@ -322,7 +340,7 @@ public static class Program
             if (!Directory.Exists("players")) Directory.CreateDirectory("players");
 
             ReadPlayers();
-            while (SafeBoolUserInput("Do you want to create others players ? (y/n)")) CreateAndSavePlayer();
+            while (SafeBoolUserInput("Voulez vous creer des nouveaux joueurs ? (y/n)")) CreateAndSavePlayer();
 
             if (_players.Count < 2)
             {
@@ -336,11 +354,11 @@ public static class Program
 
     public static void ReadPlayers()
     {
-        Console.WriteLine("There is " + Directory.GetFiles("players/").Length + " registered accounts");
+        Console.WriteLine("Il y a " + Directory.GetFiles("players/").Length + " comptes enregistrés");
         foreach (var variable in Directory.GetFiles("players/"))
         {
             Console.WriteLine("Profile " + Path.GetFileName(variable) + " found");
-            Console.WriteLine("Do you want player " + Path.GetFileName(variable) + " to play ?");
+            Console.WriteLine("Voulez vous que le joueur " + Path.GetFileName(variable) + " joue ?");
             if (SafeBoolUserInput(""))
             {
                 var player = new Player
@@ -359,9 +377,11 @@ public static class Program
 
     private static void CreateAndSavePlayer()
     {
-        Console.WriteLine("Write player name :");
+        _logs.LogWrite(@"Creation joueur en cours");
+
+        Console.WriteLine("Nom du joueur :");
         var name = SafeStringUserInput();
-        Console.WriteLine("Write how much money this player have : ");
+        Console.WriteLine("Argent du joueur : ");
         var money = SafeIntUserInput();
         File.WriteAllText("players/" + name + ".csv", money.ToString());
         var player = new Player
@@ -374,6 +394,7 @@ public static class Program
             false
         );
         _players.Add(player);
+        _logs.LogWrite(@"creation joueurs faite !");
     }
 
     private static bool SafeBoolUserInput(string s)

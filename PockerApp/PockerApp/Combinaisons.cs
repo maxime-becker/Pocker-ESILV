@@ -1,8 +1,13 @@
 ﻿namespace PockerApp;
 
+//L'objectif de cette classe est qu'a partir des 5 cartes de la table et des 2 cartes en main d'un joueur je sois en
+//mesure de définir un score correpondant à la plus haute combinaison. 
+//Chaque fonction a un nom explicite 
+
 internal static class Combinaisons
 {
     private static int _combinaison;
+
     public static int GetCombinaisons(List<Cartes> tapis, Cartes carte1, Cartes carte2)
     {
         _combinaison = 0;
@@ -170,9 +175,10 @@ internal static class Combinaisons
             {
                 if (suite == 4)
                 {
-                    _combinaison += rouged[i].Power; 
+                    _combinaison += rouged[i].Power;
                     return true;
                 }
+
                 if (rouged[i].Power - rouged[i + 1].Power == -1)
                     suite++;
                 else
@@ -187,9 +193,10 @@ internal static class Combinaisons
             {
                 if (suite == 4)
                 {
-                    _combinaison += blacked[i].Power; 
+                    _combinaison += blacked[i].Power;
                     return true;
                 }
+
                 if (blacked[i].Power - blacked[i + 1].Power == -1)
                     suite++;
                 else
@@ -211,6 +218,7 @@ internal static class Combinaisons
                 _combinaison += cartes[i].Power;
                 return true;
             }
+
             if (cartes[i].Power == cartes[i + 1].Power)
             {
                 tmp += 1;
@@ -220,6 +228,7 @@ internal static class Combinaisons
                 tmp = 0;
             }
         }
+
         return false;
     }
 
@@ -262,11 +271,13 @@ internal static class Combinaisons
                 rouged.Add(card);
             }
         }
+
         if (blacked.Count >= 5)
         {
             _combinaison += GetMaxPower(blacked);
             return true;
         }
+
         if (rouged.Count < 5) return false;
         _combinaison += GetMaxPower(rouged);
         return true;
@@ -304,7 +315,7 @@ internal static class Combinaisons
             return true;
         }
 
-        foreach (var card in cartes.Where(card => card.Power == 14))
+        foreach (var card in cartes.Where(card => card.Power == 14)) // LINQ : eq => pour tout les as 
             card.Power = 1;
         SortByPower(cartes);
         suite = 0;
@@ -319,7 +330,7 @@ internal static class Combinaisons
             return true;
         }
 
-        foreach (var card in cartes.Where(card => card.Power == 1))
+        foreach (var card in cartes.Where(card => card.Power == 1)) // LINQ : eq => pour toutes les as je reset
             card.Power = 14;
         return false;
     }
@@ -338,6 +349,7 @@ internal static class Combinaisons
             _combinaison += cartes[i + 1].Power;
             return true;
         }
+
         return false;
     }
 
@@ -365,13 +377,14 @@ internal static class Combinaisons
                 _combinaison += cartes[i + 1].Power;
                 return true;
             }
+
         return false;
     }
 
     private static int isDefault(List<Cartes> cartes)
     {
         SortByPower(cartes);
-        return cartes[^1].Power;
+        return cartes[^1].Power; // La derniere carte
     }
 
     #region StaticFunctions
@@ -391,6 +404,7 @@ internal static class Combinaisons
         for (var j = i + 1; j < cartes.Count; j++)
             if (cartes[j].Power < cartes[i].Power)
                 (cartes[j], cartes[i]) = (cartes[i], cartes[j]);
-    }   
+    }
+
     #endregion
 }

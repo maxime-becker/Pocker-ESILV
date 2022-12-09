@@ -37,7 +37,7 @@ internal class GameManager
         UpdateScreen();
     }
 
-    public static void PrintTable(List<Cartes> cardList, int number)
+    public static void PrintTable(List<Cartes> cardList, int number) // Affichage de la table 
     {
         var decalage = -number / 2;
         for (var i = 0; i < number; i++)
@@ -47,13 +47,13 @@ internal class GameManager
         }
     }
 
-    public static void PrintPlayerCard(Player player)
+    public static void PrintPlayerCard(Player player) // Affichage des cartes du joueurs
     {
         AddTextToArray(Height / 2 + 10, Width / 2 - 6, CardToString(player.Card1!));
         AddTextToArray(Height / 2 + 10, Width / 2 + 6, CardToString(player.Card2!));
     }
 
-    private static void AddTextToArray(int x, int y, string text)
+    private static void AddTextToArray(int x, int y, string text) // J'ajoute du texte à ma grille aux positions x,y
     {
         var tmp = y;
         foreach (var chr in text)
@@ -69,7 +69,7 @@ internal class GameManager
             }
     }
 
-    public static string CardToString(Cartes carte)
+    public static string CardToString(Cartes carte) // Génération des cartes en mémoire
     {
         string l1, l2, l3, l4, l5, l6;
 
@@ -124,7 +124,7 @@ internal class GameManager
         return res;
     }
 
-    public static string CartesToStringAlt(Cartes carte)
+    public static string CartesToStringAlt(Cartes carte) // Récupération des cartes sur disque (moins perf) 
     {
         var power = carte.Power;
         var res = 0;
@@ -166,7 +166,7 @@ internal class GameManager
         for (var i = 0; i < Height; i++)
         for (var j = 0; j < Width; j++)
             array[i, j] = '.';
-    }
+    } // Reset la grille 
 
     private static void UpdateScreen()
     {
@@ -178,5 +178,5 @@ internal class GameManager
             tmp += array[i, j];
 
         Console.Write(tmp);
-    }
+    } // Affiche la grille
 }
